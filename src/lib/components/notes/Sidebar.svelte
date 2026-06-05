@@ -1,108 +1,131 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
   import { page } from '$app/state';
+  import { pages, recentPages, refreshPages } from '$lib/stores/pageStore';
+  import { pageService } from '$lib/services/page.service';
+  import type { Page } from '$lib/types/page.type';
 
   let currentPath = $derived(page.url.pathname);
+  let isCreating = $state(false);
+
+  onMount(async () => {
+    await refreshPages();
+  });
+
+  async function handleNewPage() {
+    isCreating = true;
+    try {
+      const newPage = await pageService.create({ title: 'Sin título', icon: '📄' });
+      await refreshPages();
+      goto(`/pages/${newPage.id}`);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      isCreating = false;
+    }
+  }
+
+  async function handleDeletePage(e: MouseEvent, pageId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm('¿Eliminar esta página?')) return;
+    await pageService.remove(pageId);
+    await refreshPages();
+    if (currentPath.includes(pageId)) goto('/');
+  }
 
   function handleLogout() {
-    // Aquí iría la lógica real de logout (borrar cookie y redirigir)
     document.cookie = 'token=; Max-Age=0; path=/';
     window.location.href = '/auth/login';
   }
 </script>
 
-<aside class="w-64 h-full border-r border-gray-200 bg-[#fbfbfa] flex flex-col justify-between shrink-0 font-sans">
-  <div class="overflow-y-auto pb-4">
-    
+<aside class="w-64 h-full border-r border-gray-200 bg-[#fbfbfa] flex flex-col justify-between shrink-0">
+  <div class="overflow-y-auto pb-4 flex-1">
     <!-- Header -->
-    <div class="px-4 py-3 hover:bg-gray-200/50 cursor-pointer transition-colors flex items-center justify-between group">
-      <div class="flex items-center gap-2 font-semibold text-gray-900">
-        <div class="w-5 h-5 rounded bg-blue-100 text-blue-600 flex items-center justify-center">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-        </div>
-        NotCloud
+    <div class="px-4 py-3 hover:bg-gray-200/50 cursor-pointer transition-colors flex items-center gap-2 group">
+      <div class="w-5 h-5 rounded bg-blue-100 text-blue-600 flex items-center justify-center">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
       </div>
-      <svg class="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-    </div>
-
-    <!-- User Profile -->
-    <div class="px-4 py-2 mt-2 flex items-center gap-3 cursor-pointer hover:bg-gray-200/50">
-      <div class="w-6 h-6 rounded-full bg-pink-400 text-white flex items-center justify-center text-xs font-medium">s</div>
-      <span class="text-sm font-medium text-gray-700">sadasd</span>
+      <span class="font-semibold text-gray-900 text-sm">NotCloud</span>
     </div>
 
     <!-- Quick Actions -->
-    <div class="mt-4 px-2 space-y-0.5">
-      <button class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        Búsqueda rápida
-      </button>
-      <button class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        Recientes
-      </button>
+    <div class="mt-2 px-2 space-y-0.5">
+      <a href="/" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md {currentPath === '/' ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        Inicio
+      </a>
+      <a href="/favorites" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        Favoritos
+      </a>
+      <a href="/trash" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+        Papelera
+      </a>
     </div>
 
-    <!-- Sections -->
+    <!-- Recent Pages -->
     <div class="mt-6">
-      <div class="px-4 text-xs font-semibold text-gray-400 mb-1">PRINCIPAL</div>
+      <div class="px-4 text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Recientes</div>
       <nav class="px-2 space-y-0.5">
-        <a href="/" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md {currentPath === '/' ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}">
-          <svg class="w-4 h-4 {currentPath === '/' ? 'text-gray-600' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-          Inicio
-        </a>
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-          Buscar
-        </a>
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-          Notificaciones
-        </a>
+        {#if $recentPages.length === 0}
+          <p class="px-2 py-1.5 text-xs text-gray-400 italic">No hay recientes</p>
+        {/if}
+        {#each $recentPages as p}
+          <a
+            href="/pages/{p.id}"
+            class="group w-full flex items-center justify-between px-2 py-1.5 text-sm rounded-md {currentPath === `/pages/${p.id}` ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}"
+          >
+            <span class="flex items-center gap-2 truncate">
+              <span>{p.icon ?? '📄'}</span>
+              <span class="truncate">{p.title ?? 'Sin título'}</span>
+            </span>
+          </a>
+        {/each}
       </nav>
     </div>
 
-    <div class="mt-6">
-      <div class="px-4 text-xs font-semibold text-gray-400 mb-1">PRIVADO</div>
+    <!-- Pages Section -->
+    <div class="mt-4">
+      <div class="px-4 text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Mis páginas</div>
       <nav class="px-2 space-y-0.5">
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-          Mi Perfil
-        </a>
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-          Favoritos
-        </a>
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-          Mis Tareas
-        </a>
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          Mi Biblioteca
-        </a>
-      </nav>
-    </div>
-
-    <div class="mt-6 mb-4">
-      <div class="px-4 text-xs font-semibold text-gray-400 mb-1">MÁS</div>
-      <nav class="px-2 space-y-0.5">
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-          Calendario
-        </a>
-        <a href="#" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
-          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          Configuración
-        </a>
+        {#if $pages.length === 0}
+          <p class="px-2 py-1.5 text-xs text-gray-400 italic">Sin páginas aún</p>
+        {/if}
+        {#each $pages as p}
+          <a
+            href="/pages/{p.id}"
+            class="group w-full flex items-center justify-between px-2 py-1.5 text-sm rounded-md {currentPath === `/pages/${p.id}` ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}"
+          >
+            <span class="flex items-center gap-2 truncate">
+              <span>{p.icon ?? '📄'}</span>
+              <span class="truncate">{p.title ?? 'Sin título'}</span>
+            </span>
+            <button
+              onclick={(e) => handleDeletePage(e, p.id)}
+              class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all shrink-0"
+              title="Eliminar"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </a>
+        {/each}
       </nav>
     </div>
   </div>
 
   <!-- Bottom actions -->
-  <div class="p-2 border-t border-gray-200 space-y-0.5 mt-auto">
-    <button class="w-full flex items-center gap-2 px-2 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200/50 rounded-md transition-colors">
+  <div class="p-2 border-t border-gray-200 space-y-0.5">
+    <button
+      onclick={handleNewPage}
+      disabled={isCreating}
+      class="w-full flex items-center gap-2 px-2 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200/50 rounded-md transition-colors disabled:opacity-50"
+    >
       <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-      Nueva página
+      {isCreating ? 'Creando...' : 'Nueva página'}
     </button>
     <button onclick={handleLogout} class="w-full flex items-center gap-2 px-2 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200/50 rounded-md transition-colors">
       <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
