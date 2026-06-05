@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { pages, recentPages, refreshPages } from '$lib/stores/pageStore';
+  import { pages, recentPages, refreshPages, addPageToStore, removePageFromStore } from '$lib/stores/pageStore';
   import { pageService } from '$lib/services/page.service';
   import type { Page } from '$lib/types/page.type';
   import notCloudLogo from '$lib/assets/NotCloudLogo.png';
@@ -17,8 +17,8 @@
   async function handleNewPage() {
     isCreating = true;
     try {
-      const newPage = await pageService.create({ title: 'Sin título', icon: '📄' });
-      await refreshPages();
+      const newPage = await pageService.create({ title: 'Nueva página', icon: '📄' });
+      addPageToStore(newPage);
       goto(`/pages/${newPage.id}`);
     } catch (e) {
       console.error(e);
@@ -31,9 +31,13 @@
     e.preventDefault();
     e.stopPropagation();
     if (!confirm('¿Eliminar esta página?')) return;
-    await pageService.remove(pageId);
-    await refreshPages();
-    if (currentPath.includes(pageId)) goto('/');
+    try {
+      await pageService.remove(pageId);
+      removePageFromStore(pageId);
+      if (currentPath.includes(pageId)) goto('/');
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   function handleLogout() {

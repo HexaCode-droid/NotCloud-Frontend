@@ -107,6 +107,20 @@
       default:     return 'text-base text-gray-700 leading-relaxed';
     }
   }
+
+  function autoResize(node: HTMLTextAreaElement) {
+    function resize() {
+      node.style.height = 'auto';
+      node.style.height = node.scrollHeight + 'px';
+    }
+    node.addEventListener('input', resize);
+    setTimeout(resize, 0);
+    return {
+      destroy() {
+        node.removeEventListener('input', resize);
+      }
+    };
+  }
 </script>
 
 <div class="flex flex-col gap-1">
@@ -127,7 +141,7 @@
         <input type="checkbox" class="mt-1.5 shrink-0 accent-blue-600" />
       {/if}
 
-      <!-- Input del bloque (contenteditable o textarea) -->
+      <!-- Input del bloque (textarea auto-ajustable) -->
       <div class="flex-1 relative">
         {#if block.type === 'CODE'}
           <textarea
@@ -136,19 +150,21 @@
             oninput={() => scheduleSave(block)}
             onkeydown={(e) => handleKeyDown(e, block, i)}
             rows={3}
+            use:autoResize
             placeholder="Escribe código aquí..."
-            class="w-full resize-none outline-none bg-transparent {getBlockClass(block.type)} placeholder:text-gray-300"
+            class="w-full resize-none outline-none bg-transparent {getBlockClass(block.type)} placeholder:text-gray-300 break-words"
           ></textarea>
         {:else}
-          <input
+          <textarea
             data-block-input
-            type="text"
             bind:value={block.content}
             oninput={() => scheduleSave(block)}
             onkeydown={(e) => handleKeyDown(e, block, i)}
+            rows={1}
+            use:autoResize
             placeholder={block.type === 'H1' ? 'Título 1' : block.type === 'H2' ? 'Título 2' : block.type === 'H3' ? 'Título 3' : 'Escribe algo, o / para comandos...'}
-            class="w-full outline-none bg-transparent {getBlockClass(block.type)} placeholder:text-gray-300"
-          />
+            class="w-full resize-none overflow-hidden outline-none bg-transparent {getBlockClass(block.type)} placeholder:text-gray-300 break-words"
+          ></textarea>
         {/if}
 
         <!-- Menú de comandos anclado a este bloque -->

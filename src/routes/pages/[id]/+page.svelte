@@ -2,7 +2,7 @@
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import { pageService } from '$lib/services/page.service';
-  import { refreshPages } from '$lib/stores/pageStore';
+  import { updatePageInStore, addPageToStore } from '$lib/stores/pageStore';
   import BlockEditor from '$lib/components/notes/BlockEditor.svelte';
   import SubPageCard from '$lib/components/notes/SubPageCard.svelte';
   import EmojiPicker from '$lib/components/notes/EmojiPicker.svelte';
@@ -35,26 +35,32 @@
   async function handleTitleBlur() {
     if (!currentPage) return;
     await pageService.update(pageId, { title: currentPage.title ?? '' });
-    await refreshPages();
+  }
+
+  function handleTitleInput() {
+    if (!currentPage) return;
+    updatePageInStore(pageId, { title: currentPage.title ?? '' });
   }
 
   async function handleToggleFavorite() {
     if (!currentPage) return;
-    const updated = await pageService.update(pageId, { isFavorite: !currentPage.isFavorite });
-    currentPage = { ...currentPage, isFavorite: updated.isFavorite };
+    currentPage.isFavorite = !currentPage.isFavorite;
+    updatePageInStore(pageId, { isFavorite: currentPage.isFavorite });
+    await pageService.update(pageId, { isFavorite: currentPage.isFavorite });
   }
 
   async function handleCreateSubPage() {
     isCreatingSubPage = true;
     try {
       const newPage = await pageService.create({
-        title: 'Sin título',
+        title: 'Nueva página',
         icon: '📄',
         parentPageId: pageId
       });
-      // Refrescar la página actual para que aparezca la sub-página
-      currentPage = await pageService.findOne(pageId);
-      await refreshPages();
+      if (currentPage) {
+        currentPage.subPages = [...(currentPage.subPages || []), newPage];
+      }
+      addPageToStore(newPage);
     } finally {
       isCreatingSubPage = false;
     }
@@ -63,9 +69,9 @@
   async function handleEmojiSelect(emoji: string) {
     showEmojiPicker = false;
     if (!currentPage) return;
-    const updated = await pageService.update(pageId, { icon: emoji });
-    currentPage = { ...currentPage, icon: updated.icon };
-    await refreshPages();
+    currentPage.icon = emoji;
+    updatePageInStore(pageId, { icon: emoji });
+    await pageService.update(pageId, { icon: emoji });
   }
 </script>
 
@@ -110,6 +116,7 @@
           type="text"
           bind:value={currentPage.title}
           onblur={handleTitleBlur}
+          oninput={handleTitleInput}
           placeholder="Sin título"
           style="font-family: ui-serif, Georgia, serif;"
           class="flex-1 text-5xl font-bold text-[#37352f] tracking-tight outline-none bg-transparent placeholder:text-gray-200"

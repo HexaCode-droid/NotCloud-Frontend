@@ -8,7 +8,6 @@ export const pages = writable<Page[]>([]);
 export const recentPages = writable<Page[]>([]);
 
 // Función de ayuda para recargar las páginas desde la API
-// Se importa y llama desde cualquier componente que modifique páginas
 export async function refreshPages() {
   const { pageService } = await import('$lib/services/page.service');
   const [data, recentData] = await Promise.all([
@@ -17,4 +16,24 @@ export async function refreshPages() {
   ]);
   pages.set(data);
   recentPages.set(recentData);
+}
+
+// Helpers para Optimistic UI (Actualización local)
+export function addPageToStore(page: Page) {
+  // Añadir a root pages solo si no tiene padre
+  if (!page.parentPageId) {
+    pages.update(p => [page, ...p]);
+  }
+  // Añadir a recientes y mantener solo 10
+  recentPages.update(p => [page, ...p].slice(0, 10));
+}
+
+export function removePageFromStore(id: string) {
+  pages.update(p => p.filter(page => page.id !== id));
+  recentPages.update(p => p.filter(page => page.id !== id));
+}
+
+export function updatePageInStore(id: string, updates: Partial<Page>) {
+  pages.update(p => p.map(page => page.id === id ? { ...page, ...updates } : page));
+  recentPages.update(p => p.map(page => page.id === id ? { ...page, ...updates } : page));
 }
