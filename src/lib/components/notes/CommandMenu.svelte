@@ -35,6 +35,10 @@
   function handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Escape') onclose();
   }
+
+  function focusEl(node: HTMLElement) {
+    node.focus();
+  }
 </script>
 
 <!-- Backdrop -->
@@ -53,7 +57,7 @@
       bind:value={query}
       placeholder="Buscar un bloque..."
       class="w-full text-sm px-2 py-1 outline-none text-gray-700 placeholder:text-gray-400"
-      autofocus
+      use:focusEl
     />
   </div>
   <div class="py-1 max-h-64 overflow-y-auto">

@@ -5,6 +5,7 @@
   import { pages, recentPages, refreshPages } from '$lib/stores/pageStore';
   import { pageService } from '$lib/services/page.service';
   import type { Page } from '$lib/types/page.type';
+  import notCloudLogo from '$lib/assets/NotCloudLogo.png';
 
   let currentPath = $derived(page.url.pathname);
   let isCreating = $state(false);
@@ -45,9 +46,7 @@
   <div class="overflow-y-auto pb-4 flex-1">
     <!-- Header -->
     <div class="px-4 py-3 hover:bg-gray-200/50 cursor-pointer transition-colors flex items-center gap-2 group">
-      <div class="w-5 h-5 rounded bg-blue-100 text-blue-600 flex items-center justify-center">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
-      </div>
+      <img src={notCloudLogo} alt="NotCloud Logo" class="h-6 object-contain" />
       <span class="font-semibold text-gray-900 text-sm">NotCloud</span>
     </div>
 
