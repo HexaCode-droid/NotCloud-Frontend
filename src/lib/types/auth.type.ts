@@ -14,6 +14,15 @@ export interface VerifyEmailDto {
   code: string;
 }
 
+export interface ForgotPasswordDto {
+  email: string;
+}
+
+export interface ResetPasswordDto {
+  token: string;
+  newPassword: string;
+}
+
 export interface AuthResponse {
   // Nota: Esto puedes ajustarlo si tu backend te devuelve algo distinto en el login (como un access_token)
   access_token?: string;

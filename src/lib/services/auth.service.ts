@@ -1,5 +1,12 @@
 import { api } from './api';
-import type { LoginDto, RegisterDto, VerifyEmailDto, AuthResponse } from '$lib/types/auth.type';
+import type {
+  LoginDto,
+  RegisterDto,
+  VerifyEmailDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  AuthResponse
+} from '$lib/types/auth.type';
 
 export const authService = {
   
@@ -24,9 +31,17 @@ export const authService = {
   },
   
   async verifyEmail(data: VerifyEmailDto): Promise<any> {
-    // Hace POST a https://not-cloud-bakend.vercel.app/auth/verify-email
     const response = await api.post('/auth/verify-email', data);
     return response.data;
+  },
+
+  async forgotPassword(data: ForgotPasswordDto): Promise<AuthResponse> {
+    const response = await api.post('/auth/forgot-password', data);
+    return response.data;
+  },
+
+  async resetPassword(data: ResetPasswordDto): Promise<AuthResponse> {
+    const response = await api.post('/auth/reset-password', data);
+    return response.data;
   }
-  
 };
