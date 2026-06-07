@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import Card from '$lib/components/ui/Card.svelte';
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
@@ -12,7 +12,7 @@
   let errorMessage = $state('');
   let successMessage = $state('');
 
-  const token = $derived($page.url.searchParams.get('token') ?? '');
+  const token = $derived(page.url.searchParams.get('token') ?? '');
 
   async function handleSubmit() {
     if (!token) {
