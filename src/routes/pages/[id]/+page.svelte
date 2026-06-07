@@ -2,7 +2,7 @@
   import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import { pageService } from '$lib/services/page.service';
-  import { updatePageInStore, addPageToStore } from '$lib/stores/pageStore';
+  import { updatePageInStore, addPageToStore, addFavoriteToStore, refreshPages } from '$lib/stores/pageStore';
   import BlockEditor from '$lib/components/notes/BlockEditor.svelte';
   import SubPageCard from '$lib/components/notes/SubPageCard.svelte';
   import EmojiPicker from '$lib/components/notes/EmojiPicker.svelte';
@@ -14,10 +14,9 @@
   let isCreatingSubPage = $state(false);
   let showEmojiPicker = $state(false);
 
-  // $effect reacciona cada vez que pageId cambia (fix del bug de navegación)
   $effect(() => {
     const id = pageId;
-    loadPage(id);
+    if (id) loadPage(id);
   });
 
   async function loadPage(id: string) {
@@ -33,23 +32,29 @@
   }
 
   async function handleTitleBlur() {
-    if (!currentPage) return;
+    if (!currentPage || !pageId) return;
     await pageService.update(pageId, { title: currentPage.title ?? '' });
   }
 
   function handleTitleInput() {
-    if (!currentPage) return;
+    if (!currentPage || !pageId) return;
     updatePageInStore(pageId, { title: currentPage.title ?? '' });
   }
 
   async function handleToggleFavorite() {
-    if (!currentPage) return;
+    if (!currentPage || !pageId) return;
     currentPage.isFavorite = !currentPage.isFavorite;
     updatePageInStore(pageId, { isFavorite: currentPage.isFavorite });
     await pageService.update(pageId, { isFavorite: currentPage.isFavorite });
+    if (currentPage.isFavorite) {
+      addFavoriteToStore(currentPage);
+    } else {
+      await refreshPages();
+    }
   }
 
   async function handleCreateSubPage() {
+    if (!pageId) return;
     isCreatingSubPage = true;
     try {
       const newPage = await pageService.create({
@@ -68,7 +73,7 @@
 
   async function handleEmojiSelect(emoji: string) {
     showEmojiPicker = false;
-    if (!currentPage) return;
+    if (!currentPage || !pageId) return;
     currentPage.icon = emoji;
     updatePageInStore(pageId, { icon: emoji });
     await pageService.update(pageId, { icon: emoji });
@@ -137,7 +142,9 @@
     </div>
 
     <!-- Block Editor -->
-    <BlockEditor {pageId} />
+    {#if pageId}
+      <BlockEditor {pageId} />
+    {/if}
 
     <!-- Sub-pages Section -->
     {#if (currentPage.subPages?.length ?? 0) > 0 || isCreatingSubPage}

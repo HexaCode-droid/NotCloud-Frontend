@@ -2,7 +2,14 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { pages, recentPages, refreshPages, addPageToStore, removePageFromStore } from '$lib/stores/pageStore';
+  import {
+    pages,
+    recentPages,
+    refreshPages,
+    addPageToStore,
+    removePageFromStore,
+    addArchivedToStore
+  } from '$lib/stores/pageStore';
   import { pageService } from '$lib/services/page.service';
   import type { Page } from '$lib/types/page.type';
   import notCloudLogo from '$lib/assets/NotCloudLogo.png';
@@ -27,13 +34,14 @@
     }
   }
 
-  async function handleDeletePage(e: MouseEvent, pageId: string) {
+  async function handleArchivePage(e: MouseEvent, pageId: string, title?: string | null) {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm('¿Eliminar esta página?')) return;
+    if (!confirm(`¿Mover "${title ?? 'esta página'}" a la papelera?`)) return;
     try {
-      await pageService.remove(pageId);
+      const archived = await pageService.archive(pageId);
       removePageFromStore(pageId);
+      addArchivedToStore(archived);
       if (currentPath.includes(pageId)) goto('/');
     } catch (e) {
       console.error(e);
@@ -60,11 +68,11 @@
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
         Inicio
       </a>
-      <a href="/favorites" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
+      <a href="/favorites" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md {currentPath === '/favorites' ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}">
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
         Favoritos
       </a>
-      <a href="/trash" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-gray-600 hover:bg-gray-200/50 rounded-md">
+      <a href="/trash" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md {currentPath === '/trash' ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}">
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
         Papelera
       </a>
@@ -108,9 +116,9 @@
               <span class="truncate">{p.title ?? 'Sin título'}</span>
             </span>
             <button
-              onclick={(e) => handleDeletePage(e, p.id)}
+              onclick={(e) => handleArchivePage(e, p.id, p.title)}
               class="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-red-100 text-gray-400 hover:text-red-500 transition-all shrink-0"
-              title="Eliminar"
+              title="Mover a papelera"
             >
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>

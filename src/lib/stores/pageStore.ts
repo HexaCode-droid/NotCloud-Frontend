@@ -1,39 +1,69 @@
 import { writable } from 'svelte/store';
 import type { Page } from '$lib/types/page.type';
 
-// Lista de páginas raíz que se muestra en el Sidebar
 export const pages = writable<Page[]>([]);
-
-// Lista de páginas recientes
 export const recentPages = writable<Page[]>([]);
+export const favoritePages = writable<Page[]>([]);
+export const archivedPages = writable<Page[]>([]);
 
-// Función de ayuda para recargar las páginas desde la API
 export async function refreshPages() {
   const { pageService } = await import('$lib/services/page.service');
-  const [data, recentData] = await Promise.all([
+  const [data, recentData, favData, archData] = await Promise.all([
     pageService.findAll(),
-    pageService.findRecent()
+    pageService.findRecent(),
+    pageService.findFavorites(),
+    pageService.findArchived(),
   ]);
   pages.set(data);
   recentPages.set(recentData);
+  favoritePages.set(favData);
+  archivedPages.set(archData);
 }
 
-// Helpers para Optimistic UI (Actualización local)
 export function addPageToStore(page: Page) {
-  // Añadir a root pages solo si no tiene padre
   if (!page.parentPageId) {
-    pages.update(p => [page, ...p]);
+    pages.update((p) => [page, ...p]);
   }
-  // Añadir a recientes y mantener solo 10
-  recentPages.update(p => [page, ...p].slice(0, 10));
+  recentPages.update((p) => [page, ...p].slice(0, 10));
 }
 
 export function removePageFromStore(id: string) {
-  pages.update(p => p.filter(page => page.id !== id));
-  recentPages.update(p => p.filter(page => page.id !== id));
+  pages.update((p) => p.filter((page) => page.id !== id));
+  recentPages.update((p) => p.filter((page) => page.id !== id));
+  favoritePages.update((p) => p.filter((page) => page.id !== id));
 }
 
 export function updatePageInStore(id: string, updates: Partial<Page>) {
-  pages.update(p => p.map(page => page.id === id ? { ...page, ...updates } : page));
-  recentPages.update(p => p.map(page => page.id === id ? { ...page, ...updates } : page));
+  pages.update((p) => p.map((page) => (page.id === id ? { ...page, ...updates } : page)));
+  recentPages.update((p) => p.map((page) => (page.id === id ? { ...page, ...updates } : page)));
+  favoritePages.update((p) => {
+    if (updates.isFavorite === false) {
+      return p.filter((page) => page.id !== id);
+    }
+    if (updates.isFavorite === true) {
+      const existing = p.find((page) => page.id === id);
+      if (existing) {
+        return p.map((page) => (page.id === id ? { ...page, ...updates } : page));
+      }
+    }
+    return p.map((page) => (page.id === id ? { ...page, ...updates } : page));
+  });
+}
+
+export function addFavoriteToStore(page: Page) {
+  favoritePages.update((p) => {
+    if (p.some((item) => item.id === page.id)) return p;
+    return [page, ...p];
+  });
+}
+
+export function removeArchivedFromStore(id: string) {
+  archivedPages.update((p) => p.filter((page) => page.id !== id));
+}
+
+export function addArchivedToStore(page: Page) {
+  archivedPages.update((p) => {
+    if (p.some((item) => item.id === page.id)) return p;
+    return [page, ...p];
+  });
 }

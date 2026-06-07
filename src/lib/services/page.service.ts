@@ -38,6 +38,16 @@ export const pageService = {
     return res.data;
   },
 
+  async archive(id: string): Promise<Page> {
+    const res = await api.patch(`/pages/${id}`, { isArchived: true });
+    return res.data;
+  },
+
+  async restore(id: string): Promise<Page> {
+    const res = await api.patch(`/pages/${id}`, { isArchived: false });
+    return res.data;
+  },
+
   async remove(id: string): Promise<void> {
     await api.delete(`/pages/${id}`);
   }
