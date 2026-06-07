@@ -13,7 +13,12 @@ export const themes: ThemeOption[] = [
   { id: 'OCEAN', label: 'Océano', preview: 'bg-sky-50 border-sky-200' },
   { id: 'FOREST', label: 'Bosque', preview: 'bg-emerald-50 border-emerald-200' },
   { id: 'SUNSET', label: 'Atardecer', preview: 'bg-orange-50 border-orange-200' },
-  { id: 'LAVENDER', label: 'Lavanda', preview: 'bg-violet-50 border-violet-200' }
+  { id: 'LAVENDER', label: 'Lavanda', preview: 'bg-violet-50 border-violet-200' },
+  { id: 'LIQUID_GLASS', label: 'Cristal Líquido', preview: 'bg-gradient-to-br from-[#a1c4fd] to-[#c2e9fb] border-white/50 backdrop-blur-md shadow-sm' },
+  { id: 'CYBERPUNK', label: 'Cyberpunk', preview: 'bg-[#0a0a0a] border-[#ff003c] ring-1 ring-[#00f0ff]' },
+  { id: 'GALAXY', label: 'Galaxia', preview: 'bg-gradient-to-br from-[#0f2027] via-[#203a43] to-[#2c5364] border-purple-500/50' },
+  { id: 'MATCHA', label: 'Matcha', preview: 'bg-[#f4f1ea] border-[#d5d0c4] text-[#3c4a3e]' },
+  { id: 'DRACULA', label: 'Drácula', preview: 'bg-[#282a36] border-[#6272a4] text-[#f8f8f2]' }
 ];
 
 export const currentTheme = writable<ThemeId>('LIGHT');

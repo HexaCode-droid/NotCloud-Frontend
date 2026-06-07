@@ -84,9 +84,89 @@
   --nc-input: #ffffff;
 }
 
+[data-theme='liquid_glass'] {
+  --nc-bg: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+  --nc-surface: rgba(255, 255, 255, 0.45);
+  --nc-sidebar: rgba(255, 255, 255, 0.35);
+  --nc-text: #1e3a8a;
+  --nc-muted: #334155;
+  --nc-border: rgba(255, 255, 255, 0.5);
+  --nc-hover: rgba(255, 255, 255, 0.6);
+  --nc-primary: #2563eb;
+  --nc-primary-soft: rgba(255, 255, 255, 0.65);
+  --nc-input: rgba(255, 255, 255, 0.5);
+}
+
+[data-theme='liquid_glass'] [class*="bg-[var(--nc-surface)]"],
+[data-theme='liquid_glass'] [class*="bg-[var(--nc-sidebar)]"] {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+[data-theme='cyberpunk'] {
+  --nc-bg: #0a0a0a;
+  --nc-surface: #121212;
+  --nc-sidebar: #0f0f0f;
+  --nc-text: #fdf04b;
+  --nc-muted: #00f0ff;
+  --nc-border: #ff003c;
+  --nc-hover: #1f1f1f;
+  --nc-primary: #00f0ff;
+  --nc-primary-soft: rgba(0, 240, 255, 0.15);
+  --nc-input: #1a1a1a;
+}
+
+[data-theme='galaxy'] {
+  --nc-bg: linear-gradient(to right bottom, #0f2027, #203a43, #2c5364);
+  --nc-surface: rgba(20, 20, 30, 0.6);
+  --nc-sidebar: rgba(15, 15, 25, 0.6);
+  --nc-text: #f8fafc;
+  --nc-muted: #94a3b8;
+  --nc-border: rgba(255, 255, 255, 0.15);
+  --nc-hover: rgba(255, 255, 255, 0.05);
+  --nc-primary: #a855f7;
+  --nc-primary-soft: rgba(168, 85, 247, 0.2);
+  --nc-input: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='galaxy'] [class*="bg-[var(--nc-surface)]"],
+[data-theme='galaxy'] [class*="bg-[var(--nc-sidebar)]"] {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+[data-theme='matcha'] {
+  --nc-bg: #f4f1ea;
+  --nc-surface: #ffffff;
+  --nc-sidebar: #ede9df;
+  --nc-text: #3c4a3e;
+  --nc-muted: #79877b;
+  --nc-border: #d5d0c4;
+  --nc-hover: #e6e2d3;
+  --nc-primary: #6b7e6c;
+  --nc-primary-soft: #e2e8e2;
+  --nc-input: #ffffff;
+}
+
+[data-theme='dracula'] {
+  --nc-bg: #282a36;
+  --nc-surface: #44475a;
+  --nc-sidebar: #21222c;
+  --nc-text: #f8f8f2;
+  --nc-muted: #6272a4;
+  --nc-border: #6272a4;
+  --nc-hover: #4d4f68;
+  --nc-primary: #bd93f9;
+  --nc-primary-soft: rgba(189, 147, 249, 0.15);
+  --nc-input: #282a36;
+}
+
 body {
-  background-color: var(--nc-bg);
+  background: var(--nc-bg);
   color: var(--nc-text);
   font-family: ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }

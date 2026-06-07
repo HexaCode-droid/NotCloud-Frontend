@@ -1,4 +1,4 @@
-export type ThemeId = 'LIGHT' | 'DARK' | 'OCEAN' | 'FOREST' | 'SUNSET' | 'LAVENDER';
+export type ThemeId = 'LIGHT' | 'DARK' | 'OCEAN' | 'FOREST' | 'SUNSET' | 'LAVENDER' | 'LIQUID_GLASS' | 'CYBERPUNK' | 'GALAXY' | 'MATCHA' | 'DRACULA';
 
 export interface UserSettings {
   id: string;

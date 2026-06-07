@@ -3,6 +3,8 @@
   import SettingsShell from '$lib/components/settings/SettingsShell.svelte';
   import { settingsService } from '$lib/services/settings.service';
   import { themes, applyTheme, currentTheme } from '$lib/stores/themeStore';
+  import { layouts, applyLayout, currentLayout } from '$lib/stores/layoutStore';
+  import type { LayoutId } from '$lib/stores/layoutStore';
   import { loadUserProfile, userProfile } from '$lib/stores/settingsStore';
   import type { ThemeId } from '$lib/types/settings.type';
 
@@ -29,6 +31,11 @@
     } finally {
       isSavingTheme = false;
     }
+  }
+
+  function handleLayoutChange(layout: LayoutId) {
+    applyLayout(layout);
+    message = 'Disposición actualizada';
   }
 
 </script>
@@ -122,6 +129,43 @@
         >
           <div class="w-full h-8 rounded-md mb-3 border {theme.preview}"></div>
           <span class="font-medium text-[var(--nc-text)]">{theme.label}</span>
+        </button>
+      {/each}
+    </div>
+  </div>
+
+  <div class="border-t border-[var(--nc-border)] pt-8 mt-10">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="w-8 h-8 rounded-lg bg-[var(--nc-hover)] border border-[var(--nc-border)] flex items-center justify-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--nc-muted)]">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <line x1="9" y1="3" x2="9" y2="21"/>
+        </svg>
+      </span>
+      <h2 class="text-2xl font-bold text-[var(--nc-text)]" style="font-family: ui-serif, Georgia, serif;">Disposición</h2>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {#each layouts as layout}
+        <button
+          onclick={() => handleLayoutChange(layout.id)}
+          class="p-4 rounded-xl border-2 transition-all text-left flex flex-col items-center gap-2
+            {$currentLayout === layout.id
+              ? 'border-[var(--nc-primary)] bg-[var(--nc-primary-soft)]'
+              : 'border-[var(--nc-border)] bg-[var(--nc-surface)] hover:border-[var(--nc-primary)]'}"
+        >
+          {#if layout.icon === 'left'}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          {:else if layout.icon === 'right'}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+          {:else if layout.icon === 'floating'}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="11" height="16" rx="1"/></svg>
+          {:else if layout.icon === 'bottom'}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+          {:else if layout.icon === 'top'}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          {/if}
+          <span class="font-medium text-[var(--nc-text)] mt-2">{layout.label}</span>
         </button>
       {/each}
     </div>
