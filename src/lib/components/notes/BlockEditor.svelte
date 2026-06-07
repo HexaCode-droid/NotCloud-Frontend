@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { blockService } from '$lib/services/block.service';
   import { pageService } from '$lib/services/page.service';
   import { refreshPages } from '$lib/stores/pageStore';
@@ -112,22 +113,31 @@
   async function handleAiInsert(text: string) {
     if (aiAnchorIndex === null) return;
     const targetBlock = blocks[aiAnchorIndex];
+    const insertedIndex = aiAnchorIndex;
 
     // Actualizar el contenido del bloque con el texto generado
-    blocks[aiAnchorIndex] = { ...targetBlock, content: text };
+    blocks[insertedIndex] = { ...targetBlock, content: text };
     await blockService.update(pageId, targetBlock.id, { content: text });
+
+    // Esperar a que Svelte actualice el DOM y luego forzar el resize del textarea
+    await tick();
+    const els = document.querySelectorAll<HTMLTextAreaElement>('[data-block-input]');
+    const insertedEl = els[insertedIndex];
+    if (insertedEl) {
+      insertedEl.style.height = 'auto';
+      insertedEl.style.height = insertedEl.scrollHeight + 'px';
+    }
 
     // Crear un bloque vacío debajo para continuar escribiendo
     const newBlock = await blockService.create(pageId, {
       type: 'TEXT',
       content: '',
-      order: aiAnchorIndex + 1
+      order: insertedIndex + 1
     });
-    blocks = [...blocks.slice(0, aiAnchorIndex + 1), newBlock, ...blocks.slice(aiAnchorIndex + 1)];
-    setTimeout(() => {
-      const els = document.querySelectorAll('[data-block-input]');
-      (els[aiAnchorIndex + 1] as HTMLElement)?.focus();
-    }, 50);
+    blocks = [...blocks.slice(0, insertedIndex + 1), newBlock, ...blocks.slice(insertedIndex + 1)];
+    await tick();
+    const allEls = document.querySelectorAll('[data-block-input]');
+    (allEls[insertedIndex + 1] as HTMLElement)?.focus();
 
     showAi = false;
     aiAnchorIndex = null;
