@@ -13,6 +13,7 @@
   import { pageService } from '$lib/services/page.service';
   import type { Page } from '$lib/types/page.type';
   import notCloudLogo from '$lib/assets/NotCloudLogo.png';
+  import { userProfile } from '$lib/stores/settingsStore';
 
   let currentPath = $derived(page.url.pathname);
   let isCreating = $state(false);
@@ -54,7 +55,7 @@
   }
 </script>
 
-<aside class="w-64 h-full border-r border-gray-200 bg-[#fbfbfa] flex flex-col justify-between shrink-0">
+<aside class="w-64 h-full border-r flex flex-col justify-between shrink-0" style="border-color: var(--nc-border); background: var(--nc-sidebar);">
   <div class="overflow-y-auto pb-4 flex-1">
     <!-- Header -->
     <div class="px-4 py-3 hover:bg-gray-200/50 cursor-pointer transition-colors flex items-center gap-2 group">
@@ -76,6 +77,21 @@
         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
         Papelera
       </a>
+      <a href="/calendar" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md {currentPath === '/calendar' ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}">
+        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        Calendario
+      </a>
+    </div>
+
+    <!-- Más -->
+    <div class="mt-4">
+      <div class="px-4 text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Más</div>
+      <nav class="px-2 space-y-0.5">
+        <a href="/settings" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded-md {currentPath.startsWith('/settings') ? 'bg-gray-200/70 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-200/50'}">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          Configuración
+        </a>
+      </nav>
     </div>
 
     <!-- Recent Pages -->
@@ -129,7 +145,12 @@
   </div>
 
   <!-- Bottom actions -->
-  <div class="p-2 border-t border-gray-200 space-y-0.5">
+  <div class="p-2 border-t space-y-0.5" style="border-color: var(--nc-border);">
+    {#if $userProfile?.name}
+      <div class="px-2 py-2 text-xs text-gray-500 truncate">
+        {$userProfile.name}
+      </div>
+    {/if}
     <button
       onclick={handleNewPage}
       disabled={isCreating}
