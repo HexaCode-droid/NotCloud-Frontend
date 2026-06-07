@@ -74,10 +74,7 @@
     
     try {
       await authService.verifyEmail({ email, code });
-      
-      alert('¡Correo verificado con éxito! Ya puedes iniciar sesión.');
-      window.location.href = '/auth/login';
-      
+      window.location.href = '/';
     } catch (error: any) {
       console.error(error);
       errorMessage = error.response?.data?.message || 'Código incorrecto o expirado.';

@@ -3,7 +3,6 @@
   import Button from '$lib/components/ui/Button.svelte';
   import Input from '$lib/components/ui/Input.svelte';
   import { authService } from '$lib/services/auth.service';
-  import { goto } from '$app/navigation';
   import notCloudLogo from '$lib/assets/NotCloudLogo.png';
 
   let email = $state('');
@@ -17,7 +16,7 @@
     
     try {
       await authService.login({ email, password });
-      goto('/');
+      window.location.href = '/';
     } catch (error: any) {
       console.error(error);
       errorMessage = error.response?.data?.message || 'Correo o contraseña incorrectos.';

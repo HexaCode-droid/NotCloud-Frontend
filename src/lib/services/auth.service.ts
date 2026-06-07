@@ -8,35 +8,54 @@ import type {
   AuthResponse
 } from '$lib/types/auth.type';
 
+function saveAuthToken(token: string) {
+  if (typeof document === 'undefined') return;
+
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Lax${secure}`;
+}
+
 export const authService = {
-  
   async register(data: RegisterDto): Promise<AuthResponse> {
-    // Hace POST a https://not-cloud-bakend.vercel.app/auth/register
-    const response = await api.post('/auth/register', data);
+    const response = await api.post('/auth/register', {
+      ...data,
+      email: data.email.trim().toLowerCase(),
+    });
     return response.data;
   },
 
   async login(data: LoginDto): Promise<AuthResponse> {
-    // Hace POST a tu backend
-    const response = await api.post('/auth/login', data);
-    
-    // Guardamos el token en una Cookie. Así el hooks.server.ts podrá leerlo en las siguientes recargas.
-    // max-age=604800 significa que durará 7 días.
+    const response = await api.post('/auth/login', {
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+    });
+
     const token = response.data.access_token;
     if (token) {
-      document.cookie = `token=${token}; path=/; max-age=604800; SameSite=Strict`;
+      saveAuthToken(token);
     }
-    
+
     return response.data;
   },
-  
-  async verifyEmail(data: VerifyEmailDto): Promise<any> {
-    const response = await api.post('/auth/verify-email', data);
+
+  async verifyEmail(data: VerifyEmailDto): Promise<AuthResponse> {
+    const response = await api.post('/auth/verify-email', {
+      email: data.email.trim().toLowerCase(),
+      code: data.code,
+    });
+
+    const token = response.data.access_token;
+    if (token) {
+      saveAuthToken(token);
+    }
+
     return response.data;
   },
 
   async forgotPassword(data: ForgotPasswordDto): Promise<AuthResponse> {
-    const response = await api.post('/auth/forgot-password', data);
+    const response = await api.post('/auth/forgot-password', {
+      email: data.email.trim().toLowerCase(),
+    });
     return response.data;
   },
 
