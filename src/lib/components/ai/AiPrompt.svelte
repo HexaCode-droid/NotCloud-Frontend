@@ -125,7 +125,12 @@
       </div>
 
       {#if isLoading}
-        <p class="ai-thinking">✨ Pensando...</p>
+        <p class="ai-thinking">
+          <svg class="ai-thinking-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+          </svg>
+          Pensando...
+        </p>
       {/if}
 
       {#if error}
@@ -276,10 +281,18 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .ai-thinking {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 12px;
     color: #8b5cf6;
     margin: 0;
     animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  .ai-thinking-icon {
+    flex-shrink: 0;
+    animation: spin 1.4s linear infinite;
   }
 
   @keyframes pulse {

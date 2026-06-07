@@ -53,7 +53,14 @@
   </div>
 
   <div class="mb-10 border-b border-gray-200 pb-8">
-    <div class="text-5xl mb-4">🗑️</div>
+    <div class="mb-4 w-14 h-14 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+    </div>
     <h1 class="text-5xl font-bold text-[#37352f] tracking-tight" style="font-family: ui-serif, Georgia, serif;">
       Papelera
     </h1>
@@ -69,7 +76,12 @@
       {#each $archivedPages as p}
         <div class="flex items-center justify-between px-2 py-2 rounded-md hover:bg-gray-100 transition-colors group">
           <div class="flex items-center gap-3 min-w-0">
-            <span class="text-xl shrink-0 opacity-60">{p.icon ?? '📄'}</span>
+            <span class="flex items-center justify-center w-6 h-6 rounded-md bg-gray-100 flex-shrink-0 opacity-60">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </span>
             <div class="min-w-0">
               <p class="font-medium text-gray-700 truncate">{p.title ?? 'Sin título'}</p>
               <p class="text-xs text-gray-400">Eliminada el {formatDate(p.updatedAt)}</p>

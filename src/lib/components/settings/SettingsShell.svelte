@@ -3,7 +3,7 @@
 
   interface Props {
     title: string;
-    icon: string;
+    icon: Snippet;
     breadcrumb?: string;
     children: Snippet;
   }
@@ -22,8 +22,8 @@
 
   <div class="mb-10 border-b border-[var(--nc-border)] pb-8">
     <div class="flex items-center gap-4 mb-4">
-      <div class="w-14 h-14 rounded-xl bg-[var(--nc-surface)] border border-[var(--nc-border)] flex items-center justify-center text-2xl">
-        {icon}
+      <div class="w-14 h-14 rounded-xl bg-[var(--nc-surface)] border border-[var(--nc-border)] flex items-center justify-center">
+        {@render icon()}
       </div>
       <h1 class="text-4xl font-bold text-[var(--nc-text)] tracking-tight" style="font-family: ui-serif, Georgia, serif;">
         {title}
