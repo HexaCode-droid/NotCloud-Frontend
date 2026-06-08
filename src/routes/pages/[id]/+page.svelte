@@ -154,7 +154,7 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {#each currentPage.subPages ?? [] as subPage}
-            <SubPageCard page={subPage} />
+            <SubPageCard page={subPage} ondelete={(id) => { if (currentPage) currentPage.subPages = currentPage.subPages?.filter(p => p.id !== id); }} />
           {/each}
         </div>
       </div>
